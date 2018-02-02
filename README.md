@@ -6,8 +6,9 @@ Static
 ```c
 // Return values
 typedef enum {
-        PPHDRERR = -6,
-        PPREADERR,      // failure to read from fd
+        PPHDRERR = -7,
+        PPSENDERR,      // failure to send to sock fd
+        PPREADERR,      // failure to read from sock fd
         PPINVALADDR,    // invalid address
         PPINVALFAM,     // invalid family value
         PPTRUNCATED,    // truncated header
@@ -41,7 +42,7 @@ uint8_t get_addr_family(struct sockaddr_storage *addr)
 
 /* proxy_ptc_v1_encode() : encode a proxy protocol header based
  *                         on v1 specification
- * I/P     
+ * I/P
  * buf                : buffer where encoded header will be
  *                      placed
  * len                : total length of the header
@@ -70,7 +71,23 @@ pp_ret_t proxy_ptc_v1_encode(char *buf, int8_t *len,
 pp_ret_t proxy_ptc_v2_encode(char *buf, int8_t *len,
                           struct sockaddr_storage *src,
                           struct sockaddr_storage *dst)
-                          
+
+/* proxy_ptc_send()   : encode a proxy protocol header based
+ *                      on provided version and send into socket
+ * I/P
+ * fd                 : socket file descriptor
+ * ppver              : protocol proxy version
+ * src                : src address
+ * dst                : dst address
+ *
+ * O/P
+ * return             : 0 if success else errors in pp_ret_t
+ */
+pp_ret_t proxy_ptc_send(int fd,
+			pproxy_ver_t ppver,
+		        struct sockaddr_storage *src,
+			struct sockaddr_storage *dst) 
+
 /* proxy_ptc_decode() : decode a proxy protocol header from
  *                      provided pkt buffer
  * I/P     
@@ -88,8 +105,8 @@ pp_ret_t proxy_ptc_decode(char *buf, int8_t len,
                           pproxy_ver_t *ppver,
                           struct sockaddr_storage *src,
                           struct sockaddr_storage *dst)
-                          
-/* proxy_ptc_decode() : read packet and decode a proxy protocol 
+
+/* proxy_ptc_read()   : read packet and decode a proxy protocol 
  *                      header from provided sock fd
  * I/P     
  * fd                 : the file desc to read from
@@ -100,10 +117,10 @@ pp_ret_t proxy_ptc_decode(char *buf, int8_t len,
  * O/P
  * return             : 0 if success else errors in pp_ret_t
  */
-pp_ret_t proxy_ptc_read_decode(int fd,
-                               pproxy_ver_t *ppver,
-                               struct sockaddr_storage *src,
-                               struct sockaddr_storage *dst)
+pp_ret_t proxy_ptc_read(int fd,
+			pproxy_ver_t *ppver,
+		        struct sockaddr_storage *src,
+			struct sockaddr_storage *dst)
 ```
 
 #### Reference

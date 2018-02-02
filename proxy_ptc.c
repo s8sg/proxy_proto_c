@@ -172,6 +172,63 @@ pp_ret_t proxy_ptc_v2_encode(char *buf, int8_t *len,
 	return PPNOERR;
 }
 
+/* proxy_ptc_send()   : encode a proxy protocol header based
+ *                      on provided version and send into socket
+ * I/P
+ * fd                 : socket file descriptor
+ * ppver              : protocol proxy version
+ * src                : src address
+ * dst                : dst address
+ *
+ * O/P
+ * return             : 0 if success else errors in pp_ret_t
+ */
+pp_ret_t proxy_ptc_send(int fd,
+			pproxy_ver_t ppver,
+		        struct sockaddr_storage *src,
+			struct sockaddr_storage *dst) {
+
+	char pktbuf[MAX_PP_LEN];
+	int8_t len;
+	int ret, n, totalw, serrno;
+
+	switch(ppver) {
+		case PPROXY_V1:
+			ret = proxy_ptc_v1_encode(pktbuf, &len, src, dst);
+			break;
+		case PPROXY_V2:
+			ret = proxy_ptc_v2_encode(pktbuf, &len, src, dst);
+	}
+	if (ret != PPNOERR) {
+		return ret;
+	}
+
+	while(1) {
+		n = send(fd, pktbuf + totalw, len - totalw, 0);
+		serrno = errno;
+		if (n > 0) {
+			totalw += n;
+			if(totalw == (ssize_t)len)
+				break;
+			else
+				continue;
+		} else if (n ==0) {
+			continue;
+		} else {
+			if(serrno == EINTR) {
+				continue;
+			} else if (serrno == EAGAIN) { // we continue if busy
+				continue;
+			} else {
+				errno = serrno;
+				return PPSENDERR;
+			}
+		}
+	}
+	return PPNOERR;
+}
+
+
 /* proxy_ptc_decode() : decode a proxy protocol header from
  *                      provided pkt buffer
  * I/P     
@@ -314,7 +371,7 @@ pp_ret_t proxy_ptc_decode(char *buf, int8_t len,
 	return size;
 }
 
-/* proxy_ptc_decode() : read packet and decode a proxy protocol 
+/* proxy_ptc_read()   : read packet and decode a proxy protocol 
  *                      header from provided sock fd
  * I/P     
  * fd                 : the file desc to read from
@@ -325,10 +382,10 @@ pp_ret_t proxy_ptc_decode(char *buf, int8_t len,
  * O/P
  * return             : 0 if success else errors in pp_ret_t
  */
-pp_ret_t proxy_ptc_read_decode(int fd,
-			       pproxy_ver_t *ppver,
-		               struct sockaddr_storage *src,
-			       struct sockaddr_storage *dst) {
+pp_ret_t proxy_ptc_read(int fd,
+			pproxy_ver_t *ppver,
+		        struct sockaddr_storage *src,
+			struct sockaddr_storage *dst) {
 	int ret;
 	pproxy_hdr_t hdr;
 	do {

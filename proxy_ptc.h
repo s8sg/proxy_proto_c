@@ -39,8 +39,9 @@ typedef union {
 } pproxy_hdr_t;
 
 typedef enum {
-	PPHDRERR = -6,
-	PPREADERR,
+	PPHDRERR = -7,
+	PPSENDERR,      // failure to send to sock fd
+	PPREADERR,      // failure to read from sock fd
 	PPINVALADDR,    // invalid address
 	PPINVALFAM,     // invalid family value
 	PPTRUNCATED,    // truncated header
@@ -73,15 +74,20 @@ pp_ret_t proxy_ptc_v2_encode(char *buf, int8_t *len,
 		             struct sockaddr_storage *src,
 		             struct sockaddr_storage *dst);
 
+pp_ret_t proxy_ptc_send(int fd,
+			pproxy_ver_t ppver,
+		        struct sockaddr_storage *src,
+			struct sockaddr_storage *dst);
+
 pp_ret_t proxy_ptc_decode(char *buf, int8_t len,
 			  pproxy_ver_t *ppver,
 		          struct sockaddr_storage *src,
 			  struct sockaddr_storage *dst);
 
-pp_ret_t proxy_ptc_read_decode(int fd,
-		               pproxy_ver_t *ppver,
-			       struct sockaddr_storage *src,
-			       struct sockaddr_storage *dst);
+pp_ret_t proxy_ptc_read(int fd,
+			pproxy_ver_t *ppver,
+			struct sockaddr_storage *src,
+			struct sockaddr_storage *dst);
 
 uint8_t get_addr_family(struct sockaddr_storage *addr);
 
