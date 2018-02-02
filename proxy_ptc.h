@@ -39,14 +39,19 @@ typedef union {
 } pproxy_hdr_t;
 
 typedef enum {
-	PPNOERR = 0,
-	PPHDRERR,
-	PPADDRERR
-} pp_err_t;
+	PPHDRERR = -6,
+	PPREADERR,
+	PPINVALADDR,    // invalid address
+	PPINVALFAM,     // invalid family value
+	PPTRUNCATED,    // truncated header
+	PPINVALCMD,     // invalid cmd
+	PPNOERR = 0,    // no error
+	PPLOCALCMD,     // local command in vercmd
+} pp_ret_t;
 
 typedef enum {
 	PPROXY_V1 = 1,
-	PPROXY_v2
+	PPROXY_V2
 } pproxy_ver_t;
 
 #define IPV4_ADDR_LEN 12
@@ -60,31 +65,31 @@ typedef enum {
 static const char v2sig[12] = "\x0D\x0A\x0D\x0A\x00\x0D\x0A\x51\x55\x49\x54\x0A";
 static const uint8_t vercmd = 0x21;
 
-pp_err_t proxy_ptc_v1_encode(uint8_t *buf, int8_t *len,
+pp_ret_t proxy_ptc_v1_encode(char *buf, int8_t *len,
 		             struct sockaddr_storage *src,
 		             struct sockaddr_storage *dst);
 
-pp_err_t proxy_ptc_v2_encode(uint8_t *buf, int8_t *len,
+pp_ret_t proxy_ptc_v2_encode(char *buf, int8_t *len,
 		             struct sockaddr_storage *src,
 		             struct sockaddr_storage *dst);
 
-pp_err_t proxy_ptc_decode(uint8_t *buf, int8_t len,
+pp_ret_t proxy_ptc_decode(char *buf, int8_t len,
 			  pproxy_ver_t *ppver,
 		          struct sockaddr_storage *src,
 			  struct sockaddr_storage *dst);
 
-pp_err_t proxy_ptc_read_decode(int fd,
+pp_ret_t proxy_ptc_read_decode(int fd,
 		               pproxy_ver_t *ppver,
 			       struct sockaddr_storage *src,
 			       struct sockaddr_storage *dst);
 
 uint8_t get_addr_family(struct sockaddr_storage *addr);
 
-uint16_t get_inet4_ip(struct sockaddr_storage *addr);
+struct in_addr get_inet4_ip(struct sockaddr_storage *addr);
 
 struct in6_addr get_inet6_ip(struct sockaddr_storage *addr);
 
-uint16_t get_inet4_port(struct sockaddr_storage *addr);
+uint8_t get_inet4_port(struct sockaddr_storage *addr);
 
 uint16_t get_inet6_port(struct sockaddr_storage *addr);
 
