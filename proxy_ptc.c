@@ -242,15 +242,15 @@ pp_ret_t proxy_ptc_send(int fd,
  * return             : total header size if success else 
  *                      errors in pp_ret_t
  */
-pp_ret_t proxy_ptc_decode(char *buf, int8_t len,
+pp_ret_t proxy_ptc_decode(char *buf, int len,
 			  pproxy_ver_t *ppver,
 		          struct sockaddr_storage *src,
 			  struct sockaddr_storage *dst) {
 	int size;
 	pproxy_hdr_t *hdr;
 
-	hdr = (pproxy_hdr_t *)hdr;
-	if(len >= V2_HDR_LEN && memcmp(hdr->v2.sig, v2sig, 12) == 0 &&
+	hdr = (pproxy_hdr_t *)buf;
+	if(len >= V2_HDR_LEN && memcmp(&hdr->v2, v2sig, 12) == 0 &&
 			        (hdr->v2.ver_cmd & 0xF0) == 0x20) {
 		*ppver = PPROXY_V2;
 		size = 16 + ntohs(hdr->v2.len);
@@ -297,7 +297,6 @@ pp_ret_t proxy_ptc_decode(char *buf, int8_t len,
 		char *word, *saveptr, *valid_addr_chars, *srcip, *dstip;
 		uint16_t srcport, dstport;
 		int family;
-		
 
 		*ppver = PPROXY_V1;
 		if (!end || end[1] != '\n')

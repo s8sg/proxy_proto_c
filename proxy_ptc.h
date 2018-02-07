@@ -79,7 +79,7 @@ pp_ret_t proxy_ptc_send(int fd,
 		        struct sockaddr_storage *src,
 			struct sockaddr_storage *dst);
 
-pp_ret_t proxy_ptc_decode(char *buf, int8_t len,
+pp_ret_t proxy_ptc_decode(char *buf, int len,
 			  pproxy_ver_t *ppver,
 		          struct sockaddr_storage *src,
 			  struct sockaddr_storage *dst);
