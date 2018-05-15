@@ -265,24 +265,24 @@ pp_ret_t proxy_ptc_decode(char *buf, int len,
 						((struct sockaddr_in *)src)->sin_addr.s_addr =
 							hdr->v2.addr.ip4.src_addr;
 						((struct sockaddr_in *)src)->sin_port =
-							hdr->v2.addr.ip4.src_port;
+							ntohs(hdr->v2.addr.ip4.src_port);
 						((struct sockaddr_in *)dst)->sin_family = AF_INET;
 						((struct sockaddr_in *)dst)->sin_addr.s_addr =
 							hdr->v2.addr.ip4.dst_addr;
 						((struct sockaddr_in *)dst)->sin_port =
-							hdr->v2.addr.ip4.dst_port;
+							ntohs(hdr->v2.addr.ip4.dst_port);
 						break;
 					case 0x21:  /* TCPv6 */
 						((struct sockaddr_in6 *)src)->sin6_family = AF_INET6;
 						memcpy(&((struct sockaddr_in6 *)src)->sin6_addr,
 							hdr->v2.addr.ip6.src_addr, 16);
 						((struct sockaddr_in6 *)src)->sin6_port =
-							hdr->v2.addr.ip6.src_port;
+							ntohs(hdr->v2.addr.ip6.src_port);
 						((struct sockaddr_in6 *)dst)->sin6_family = AF_INET6;
 						memcpy(&((struct sockaddr_in6 *)dst)->sin6_addr,
 								hdr->v2.addr.ip6.dst_addr, 16);
 						((struct sockaddr_in6 *)dst)->sin6_port =
-							hdr->v2.addr.ip6.dst_port;
+							ntohs(hdr->v2.addr.ip6.dst_port);
 						break;
 				}
 				break;
